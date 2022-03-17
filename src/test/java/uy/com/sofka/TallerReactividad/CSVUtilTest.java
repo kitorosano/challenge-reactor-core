@@ -41,6 +41,28 @@ public class CSVUtilTest {
     List<Player> players = csvUtilFile.getPlayers()
                           .collectList()
                           .block();
-    assertEquals(98, players.size());
+
+    assertEquals(199, players.size());
+  }
+
+  
+  @Test
+  void reactive_filtrarJugadoresMayoresA35(){
+    Flux<Player> players = csvUtilFile.getPlayers();
+    Mono<Map<String, Collection<Player>>> listFilter = players
+                                                      .filter(player -> player.age >= 35)
+                                                      .map(player -> {
+                                                        player.name = player.name.toUpperCase(Locale.ROOT);
+                                                        return player;
+                                                      })
+                                                      .buffer(100)
+                                                      .flatMap(playerA -> players
+                                                              .filter(playerB -> playerA.stream()
+                                                                      .anyMatch(a ->  a.club.equals(playerB.club)))
+                                                      )
+                                                      .distinct()
+                                                      .collectMultimap(Player::getClub);
+
+    assertEquals(5, listFilter.block().size());
   }
 }
