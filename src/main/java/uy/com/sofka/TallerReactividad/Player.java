@@ -1,14 +1,13 @@
-package com.example.demo;
-
+package uy.com.sofka.TallerReactividad;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("Jugadores")
+@Document(collection = "PlayersMin")
 public class Player {
+
     @Id
     public String _id;
-    public int id;
     public String name;
     public int age;
     public String icon;
@@ -17,36 +16,25 @@ public class Player {
     public int games;
     public String club;
 
-    public Player(){
+    public Player(){}
 
+    public Player(String _id, String name, int age, String icon, String national, int winners, int games, String club) {
+      this._id = _id;
+      this.name = name;
+      this.age = age;
+      this.icon = icon;
+      this.national = national;
+      this.winners = winners;
+      this.games = games;
+      this.club = club;
     }
 
-    public Player(String _id, int id, String name, int age, String icon, String national, int winners, int games, String club) {
-        this._id = _id;
-        this.id = id;
-        this.name = name;
-        this.age = age;
-        this.icon = icon;
-        this.national = national;
-        this.winners = winners;
-        this.games = games;
-        this.club = club;
-    }
-
-    public String get_id() {
+    public String get_Id() {
         return _id;
     }
 
-    public void set_id(String _id) {
+    public void set_Id(String _id) {
         this._id = _id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {

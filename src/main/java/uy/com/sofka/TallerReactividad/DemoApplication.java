@@ -1,4 +1,4 @@
-package com.example.demo;
+package uy.com.sofka.TallerReactividad;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
