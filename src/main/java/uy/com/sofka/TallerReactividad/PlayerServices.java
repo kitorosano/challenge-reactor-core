@@ -1,9 +1,13 @@
 package uy.com.sofka.TallerReactividad;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class PlayerServices {
@@ -36,6 +40,14 @@ public class PlayerServices {
     return playerRepository.findByAgeGreaterOrEqualAndClub(age, club)
                           .buffer(100)
                           .flatMap(player -> Flux.fromStream(player.parallelStream()));
+  }
+
+  public Mono<Map<String, Collection<Player>>> getRankingDescOnNationalities(){
+    return playerRepository.findAll()
+                          .buffer(100)
+                          .flatMap(player -> Flux.fromStream(player.parallelStream()))
+                          .sort((a, b) -> b.getWinners() - a.getWinners())
+                          .collectMultimap(Player::getNational);
   }
 
 }
