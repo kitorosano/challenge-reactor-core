@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 
 @DataMongoTest
 public class CSVUtilTest {
-  private static final Logger log = LoggerFactory.getLogger(PlayerRepository.class);
+  // private static final Logger log = LoggerFactory.getLogger(PlayerRepository.class);
 
   @Autowired
   public PlayerRepository playerRepository;
@@ -45,24 +45,40 @@ public class CSVUtilTest {
     assertEquals(199, players.size());
   }
 
-  
   @Test
   void reactive_filtrarJugadoresMayoresA35(){
-    Flux<Player> players = csvUtilFile.getPlayers();
-    Mono<Map<String, Collection<Player>>> listFilter = players
-                                                      .filter(player -> player.age >= 35)
-                                                      .map(player -> {
-                                                        player.name = player.name.toUpperCase(Locale.ROOT);
-                                                        return player;
-                                                      })
-                                                      .buffer(100)
-                                                      .flatMap(playerA -> players
-                                                              .filter(playerB -> playerA.stream()
-                                                                      .anyMatch(a ->  a.club.equals(playerB.club)))
-                                                      )
-                                                      .distinct()
-                                                      .collectMultimap(Player::getClub);
+    Integer age = 35;
 
+    Flux<Player> players = csvUtilFile.getPlayers();
+    Mono<List<Player>> listFilter = players
+                              .filter(player -> player.age >= age)
+                              .buffer(100)
+                              .flatMap(playerBuffer -> Flux.fromIterable(playerBuffer))
+                              .collectList();
+
+    listFilter.block().forEach((player) -> {
+      System.out.println("\n" + player);
+    });
     assertEquals(5, listFilter.block().size());
   }
+
+  @Test
+  void reactive_filtrarJugadoresEquipoJuventus(){
+    String equipo = "Juventus";
+
+    Flux<Player> players = csvUtilFile.getPlayers();
+    Mono<List<Player>> listFilter = players
+                                    .filter(player -> player.getClub().equals(equipo))
+                                    .buffer(100)
+                                    .flatMap(playerBuffer -> Flux.fromIterable(playerBuffer))
+                                    .collectList();
+
+    listFilter.block().forEach((player) -> {
+      System.out.println("\n" + player);
+    });
+
+    assertEquals(15, listFilter.block().size());
+  }
+
 }
+
