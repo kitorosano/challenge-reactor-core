@@ -47,6 +47,8 @@ public class CSVUtilTest {
     this.csvUtilFile= new CsvUtilFile(playerRepository);
   }
 
+  //WORKING WITH MINIFIED DATA.CSV FILE (200 Lines)
+
   @Test
   void reactive_min_obtenerJugadores() throws IOException, URISyntaxException, CsvException{
     List<Player> players = csvUtilFile.getPlayers();
@@ -92,6 +94,65 @@ public class CSVUtilTest {
 
   @Test
   void reactive_min_RankingJugadoresPorNacionalidad() throws IOException, URISyntaxException, CsvException{
+    List<Player> players = csvUtilFile.getPlayers();
+    Flux<Player> listFlux = Flux.fromStream(players.parallelStream()).cache();
+    Mono<Map<String, Collection<Player>>> listFilter = listFlux
+                                                      .sort((a, b) -> b.getWinners() - a.getWinners())
+                                                      .collectMultimap(Player::getNational);
+
+    listFilter.block().forEach((national, playerList) -> {
+      System.out.println("\n" + national);
+      playerList.stream().forEach(player-> System.out.println(player.name + "- Partidos ganados: " + player.winners));
+    });
+  }
+
+  // ORIGINAL DATA.CSV FILE (18207 Lines)
+
+  @Test
+  void reactive_obtenerJugadores() throws IOException, URISyntaxException, CsvException{
+    List<Player> players = csvUtilFile.getPlayers();
+    assertEquals(18207, players.size());
+  }
+
+  @Test
+  void reactive_filtrarJugadoresMayoresA35() throws IOException, URISyntaxException, CsvException{
+    Integer age = 35;
+
+    List<Player> players = csvUtilFile.getPlayers();
+    Flux<Player> listFlux = Flux.fromStream(players.parallelStream()).cache();
+    Mono<List<Player>> listFilter = listFlux
+                              .filter(player -> player.getAge() >= age)
+                              .buffer(100)
+                              .flatMap(playerBuffer -> Flux.fromIterable(playerBuffer))
+                              .collectList();
+
+    listFilter.block().forEach((player) -> {
+      System.out.println("\n" + player);
+    });
+    assertEquals(489, listFilter.block().size());
+  }
+
+  @Test
+  void reactive_filtrarJugadoresEquipoJuventus() throws IOException, URISyntaxException, CsvException{
+    String equipo = "Juventus";
+
+    List<Player> players = csvUtilFile.getPlayers();
+    Flux<Player> listFlux = Flux.fromStream(players.parallelStream()).cache();
+    Mono<List<Player>> listFilter = listFlux
+                                    .filter(player -> player.getClub().equals(equipo))
+                                    .buffer(100)
+                                    .flatMap(playerBuffer -> Flux.fromIterable(playerBuffer))
+                                    .collectList();
+
+    listFilter.block().forEach((player) -> {
+      System.out.println("\n" + player);
+    });
+
+    assertEquals(25, listFilter.block().size());
+  }
+
+  @Test
+  void reactive_RankingJugadoresPorNacionalidad() throws IOException, URISyntaxException, CsvException{
     List<Player> players = csvUtilFile.getPlayers();
     Flux<Player> listFlux = Flux.fromStream(players.parallelStream()).cache();
     Mono<Map<String, Collection<Player>>> listFilter = listFlux

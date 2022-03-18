@@ -23,7 +23,7 @@ public class CsvUtilFile {
   public List<Player> getPlayers() throws URISyntaxException,IOException, CsvException {
     List<Player> players = new ArrayList<Player>();
     
-    String csvFile = CsvUtilFile.class.getClassLoader().getResource("data.min.csv").getFile();
+    String csvFile = CsvUtilFile.class.getClassLoader().getResource("data.csv").getFile();
     CSVParser parser = new CSVParserBuilder().withSeparator(';').build();
     
     try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(csvFile))
