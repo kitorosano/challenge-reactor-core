@@ -12,12 +12,30 @@ public class PlayerServices {
   PlayerRepository playerRepository;
 
   
-  public Flux<Player> getPlayers(){
-    Flux<Player> players = playerRepository
-                          .findAll()
+  public Flux<Player> getPlayers(Integer age, String club){
+    
+    // Find without filters, both null
+    if(age == null && club == null)
+      return playerRepository.findAll()
+                            .buffer(100)
+                            .flatMap(player -> Flux.fromStream(player.parallelStream()));
+    
+    // Find if only age is not null
+    if(age != null && club == null)
+      return playerRepository.findByAgeGreaterOrEqual(age)
+                            .buffer(100)
+                            .flatMap(player -> Flux.fromStream(player.parallelStream()));
+
+    // Find if only club is not null
+    if(age == null && club != null)
+      return playerRepository.findByClub(club)
+                            .buffer(100)
+                            .flatMap(player -> Flux.fromStream(player.parallelStream()));
+
+    // Find using both filters
+    return playerRepository.findByAgeGreaterOrEqualAndClub(age, club)
                           .buffer(100)
                           .flatMap(player -> Flux.fromStream(player.parallelStream()));
-    return players;
   }
 
 }

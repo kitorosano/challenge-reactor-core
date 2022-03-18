@@ -107,7 +107,6 @@ public class CSVUtilTest {
   }
 
   // ORIGINAL DATA.CSV FILE (18207 Lines)
-
   @Test
   void reactive_obtenerJugadores() throws IOException, URISyntaxException, CsvException{
     List<Player> players = csvUtilFile.getPlayers();
